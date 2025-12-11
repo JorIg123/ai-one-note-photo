@@ -1,56 +1,45 @@
 // src/App.jsx
 import { useEffect, useState } from "react";
 import "./App.css";
-import { auth, googleProvider, githubProvider, db } from "./firebaseConfig";
-import {
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  onSnapshot,
-  // orderBy, // si quieres luego ordenar por createdAt
-  serverTimestamp,
-  doc,
-  updateDoc,
-  deleteDoc,
-} from "firebase/firestore";
+import { auth, googleProvider, githubProvider, db, storage } from "./firebaseConfig";
+import { signInWithPopup, signOut,  onAuthStateChanged,} from "firebase/auth";
+import { collection, addDoc, query, where, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc,} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Estado para notas
+ 
   const [notes, setNotes] = useState([]);
   const [notesLoading, setNotesLoading] = useState(false);
   const [notesError, setNotesError] = useState("");
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
 
-  // Estado para saber si estamos editando una nota (Update)
+ 
   const [editingNoteId, setEditingNoteId] = useState(null);
+
+ 
+  const [noteImageFile, setNoteImageFile] = useState(null);
 
   const isEditing = Boolean(editingNoteId);
 
-  // Escuchar cambios de autenticación (login / logout)
+ 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setAuthLoading(false);
     });
 
-    // Limpieza del listener
+   
     return () => unsubscribe();
   }, []);
 
-  // Escuchar en tiempo real las notes du user connecté
+ 
   useEffect(() => {
-    // Si no hay usuario, vaciamos la lista y no nos suscribimos a Firestore
+   
     if (!user) {
       setNotes([]);
       return;
@@ -62,7 +51,7 @@ function App() {
     const q = query(
       collection(db, "notes"),
       where("userId", "==", user.uid)
-      // orderBy("createdAt", "desc") // puedes reactivarlo si creas el index
+     
     );
 
     const unsubscribe = onSnapshot(
@@ -82,7 +71,7 @@ function App() {
       }
     );
 
-    // Cleanup du listener de Firestore
+ 
     return () => unsubscribe();
   }, [user]);
 
@@ -110,24 +99,33 @@ function App() {
     setError("");
     try {
       await signOut(auth);
-      // Al desconectarse, salimos del modo edición si estaba activo
-      setEditingNoteId(null);
-      setNoteTitle("");
-      setNoteContent("");
+
+      resetNoteForm();
     } catch (err) {
       console.error("Erreur lors de la déconnexion:", err);
       setError("Erreur lors de la déconnexion.");
     }
   };
 
-  // Reset del formulario y modo edición
+ 
   const resetNoteForm = () => {
     setNoteTitle("");
     setNoteContent("");
+    setNoteImageFile(null);
     setEditingNoteId(null);
   };
 
-  // Submit del formulario: Create o Update según el estado
+ 
+  const handleNoteImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setNoteImageFile(file);
+    } else {
+      setNoteImageFile(null);
+    }
+  };
+
+ 
   const handleSubmitNote = async (event) => {
     event.preventDefault();
     setNotesError("");
@@ -140,26 +138,31 @@ function App() {
     const trimmedTitle = noteTitle.trim();
     const trimmedContent = noteContent.trim();
 
-    if (!trimmedTitle && !trimmedContent) {
-      setNotesError("Veuillez saisir au moins un titre ou un contenu.");
+   
+    if (!trimmedTitle && !trimmedContent && !noteImageFile) {
+      setNotesError(
+        "Veuillez saisir au moins un titre, un contenu ou choisir une image."
+      );
       return;
     }
 
     try {
+      let noteRef;
+
       if (!isEditing) {
-        // CREATE
-        await addDoc(collection(db, "notes"), {
+        
+        noteRef = await addDoc(collection(db, "notes"), {
           userId: user.uid,
           title: trimmedTitle,
           content: trimmedContent,
-          imageUrl: "", // se rellenará plus tard avec Storage
-          aiSummary: "", // se rellenará plus tard avec OpenAI
+          imageUrl: "", 
+          aiSummary: "", 
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
       } else {
-        // UPDATE
-        const noteRef = doc(db, "notes", editingNoteId);
+        
+        noteRef = doc(db, "notes", editingNoteId);
         await updateDoc(noteRef, {
           title: trimmedTitle,
           content: trimmedContent,
@@ -167,7 +170,21 @@ function App() {
         });
       }
 
-      // Reset del formulario y modo edición
+      
+      if (noteImageFile) {
+        const storagePath = `notes/${user.uid}/${noteRef.id}/${noteImageFile.name}`;
+        const fileRef = ref(storage, storagePath);
+
+        await uploadBytes(fileRef, noteImageFile);
+        const downloadUrl = await getDownloadURL(fileRef);
+
+        await updateDoc(noteRef, {
+          imageUrl: downloadUrl,
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+     
       resetNoteForm();
     } catch (err) {
       console.error("Erreur lors de l'enregistrement de la note:", err);
@@ -175,19 +192,21 @@ function App() {
     }
   };
 
-  // Entrar en modo edición para una nota existente
+  
   const handleEditNote = (note) => {
     setEditingNoteId(note.id);
     setNoteTitle(note.title || "");
     setNoteContent(note.content || "");
+  
+    setNoteImageFile(null);
   };
 
-  // Cancelar la edición
+  
   const handleCancelEdit = () => {
     resetNoteForm();
   };
 
-  // DELETE
+
   const handleDeleteNote = async (noteId) => {
     setNotesError("");
     if (!user) {
@@ -204,7 +223,7 @@ function App() {
       const noteRef = doc(db, "notes", noteId);
       await deleteDoc(noteRef);
 
-      // Si estábamos editando esta nota, salimos del modo edición
+  
       if (editingNoteId === noteId) {
         resetNoteForm();
       }
@@ -274,7 +293,7 @@ function App() {
 
           <hr className="section-divider" />
 
-          <h2>Notes Firestore </h2>
+          <h2>Notes Firestore (CRUD + Upload Storage)</h2>
 
           {!user ? (
             <p className="info-message">
@@ -297,9 +316,17 @@ function App() {
                   className="note-textarea"
                   rows={3}
                 />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleNoteImageChange}
+                  className="note-file-input"
+                />
                 <div className="note-form-actions">
                   <button type="submit" className="btn btn-note-submit">
-                    {isEditing ? "Mettre à jour la note" : "Enregistrer la note"}
+                    {isEditing
+                      ? "Mettre à jour la note"
+                      : "Enregistrer la note"}
                   </button>
                   {isEditing && (
                     <button
@@ -326,6 +353,13 @@ function App() {
                       </h3>
                       {note.content && (
                         <p className="note-content">{note.content}</p>
+                      )}
+                      {note.imageUrl && (
+                        <img
+                          src={note.imageUrl}
+                          alt={note.title || "Image de la note"}
+                          className="note-image"
+                        />
                       )}
                       <p className="note-meta">
                         Créée le{" "}

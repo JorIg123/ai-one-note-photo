@@ -164,6 +164,17 @@
   width: 100%;
 }
 
+.note-image {
+  display: block;
+  margin: 0.5rem auto;      /* centrada */
+  width: 220px;             /* ancho máximo fijo */
+  height: 150px;            /* alto fijo */
+  object-fit: cover;        /* recorta sin deformar */
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+}
+
+
 .note-input,
 .note-textarea {
   width: 100%;
