@@ -1,16 +1,10 @@
-/* src/App.css */
-
-:root {
-  color-scheme: dark;
-}
-
+/* Contenedor principal */
 .app {
-  min-height: 100vh;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  background: #020617;
-  color: #e5e7eb;
-  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  text-align: center;
 }
 
 .app-header {
@@ -18,97 +12,81 @@
 }
 
 .app-header h1 {
-  font-size: 2.4rem;
-  margin-bottom: 0.5rem;
-}
-
-.app-header p {
-  font-size: 0.95rem;
-  color: #9ca3af;
+  margin: 0;
+  font-size: 2.5rem;
+  color: #f97316;
 }
 
 .app-main {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr);
-  gap: 1.5rem;
-}
-
-@media (max-width: 900px) {
-  .app-main {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .app-section {
-  background: #020617;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  border: 1px solid #1f2937;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  width: 100%;
 }
 
 .app-section h2 {
-  margin-bottom: 0.75rem;
-  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: #e5e7eb;
 }
 
-.app-section ul {
-  padding-left: 1.5rem;
-  font-size: 0.95rem;
-}
-
-.app-section li {
-  margin-bottom: 0.25rem;
-}
-
-/* Auth UI */
-
-.login-buttons {
+/* Tarjeta de usuario */
+.user-card {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  font-size: 0.95rem;
-}
-
-.login-buttons-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.btn {
-  border: none;
-  border-radius: 999px;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  font-weight: 500;
-  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.1s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45);
-}
-
-.btn:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-.btn-google {
-  background: #f97316;
-  color: white;
-}
-
-.btn-github {
-  background: #111827;
-  color: #e5e7eb;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
   border: 1px solid #374151;
+  background: #020617;
+  margin-bottom: 1rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #f97316;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.user-email {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.user-provider {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #60a5fa;
+}
+
+/* Botones */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-logout {
@@ -116,50 +94,195 @@
   color: white;
 }
 
-/* User card */
+.btn-logout:hover {
+  background: #dc2626;
+}
 
-.user-card {
+.login-buttons {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1rem;
+}
+
+.login-buttons-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-google {
+  background: #4285f4;
+  color: white;
+}
+
+.btn-google:hover {
+  background: #357ae8;
+}
+
+.btn-github {
+  background: #24292e;
+  color: white;
+}
+
+.btn-github:hover {
+  background: #1b1f23;
+}
+
+/* Mensajes de error */
+.error-message {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+/* Separador entre Auth et Notes */
+.section-divider {
+  margin: 1.5rem 0;
+  border: none;
+  border-top: 1px solid #1f2937;
+  width: 100%;
+}
+
+/* Messages informatifs */
+.info-message {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+/* Formulaire de note */
+.note-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.note-input,
+.note-textarea {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.note-input:focus,
+.note-textarea:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 1px #f97316;
+}
+
+.note-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 600px;
+  justify-content: center;
+}
+
+.btn-note-submit {
+  background: #22c55e;
+  color: #022c22;
+  flex: 1;
+}
+
+.btn-note-submit:hover {
+  background: #16a34a;
+}
+
+.btn-note-cancel {
+  background: #6b7280;
+  color: white;
+  flex: 1;
+}
+
+.btn-note-cancel:hover {
+  background: #4b5563;
+}
+
+/* Liste de notes */
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.note-item {
   border-radius: 0.75rem;
   border: 1px solid #1f2937;
-  padding: 1rem;
-  background: radial-gradient(circle at top left, #1f2937 0, #020617 50%);
+  padding: 0.75rem;
+  background: #020617;
+  text-align: left;
 }
 
-.user-info {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.user-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
-  object-fit: cover;
-  border: 2px solid #22c55e;
-}
-
-.user-name {
+.note-title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.15rem;
+  color: #f97316;
 }
 
-.user-email {
-  font-size: 0.85rem;
+.note-content {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+.note-meta {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
   color: #9ca3af;
 }
 
-.user-provider {
-  font-size: 0.8rem;
-  color: #a855f7;
+/* Acciones de cada nota */
+.note-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-.error-message {
-  margin-top: 0.75rem;
+.btn-note-edit {
+  background: #3b82f6;
+  color: white;
   font-size: 0.85rem;
-  color: #f97373;
+  padding: 0.4rem 0.8rem;
+  flex: 1;
 }
+
+.btn-note-edit:hover {
+  background: #2563eb;
+}
+
+.btn-note-delete {
+  background: #ef4444;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  flex: 1;
+}
+
+.btn-note-delete:hover {
+  background: #dc2626;
+}
+
+.error-notes {
+  margin-top: 0.5rem;
+}
+
 
