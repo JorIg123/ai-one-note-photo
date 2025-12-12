@@ -293,8 +293,8 @@ function App() {
       </header>
 
       <main className="app-main">
-        <section className="app-section">
-          <h2>Authentification Google &amp; GitHub</h2>
+        <aside className="auth-sidebar">
+          <h2>Authentification</h2>
 
           {authLoading ? (
             <p>Chargement de l&apos;état de connexion...</p>
@@ -343,10 +343,10 @@ function App() {
           )}
 
           {error && <p className="error-message">{error}</p>}
+        </aside>
 
-          <hr className="section-divider" />
-
-          <h2>Notes Firestore (CRUD + Upload Storage)</h2>
+        <section className="notes-section">
+          <h2>Mes Notes</h2>
 
           {!user ? (
             <p className="info-message">
@@ -367,7 +367,7 @@ function App() {
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
                   className="note-textarea"
-                  rows={3}
+                  rows={10}
                 />
                 <input
                   type="file"
