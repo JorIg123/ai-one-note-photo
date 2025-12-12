@@ -1,5 +1,5 @@
-// src/App.jsx
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, startTransition } from "react";
 import "./App.css";
 import { auth, googleProvider, githubProvider, db, storage } from "./firebaseConfig";
 import { signInWithPopup, signOut,  onAuthStateChanged,} from "firebase/auth";
@@ -24,6 +24,10 @@ function App() {
  
   const [noteImageFile, setNoteImageFile] = useState(null);
 
+ 
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [summaryNoteId, setSummaryNoteId] = useState(null);
+
   const isEditing = Boolean(editingNoteId);
 
  
@@ -41,12 +45,13 @@ function App() {
   useEffect(() => {
    
     if (!user) {
-      setNotes([]);
       return;
     }
 
-    setNotesLoading(true);
-    setNotesError("");
+    startTransition(() => {
+      setNotesLoading(true);
+      setNotesError("");
+    });
 
     const q = query(
       collection(db, "notes"),
@@ -61,13 +66,17 @@ function App() {
           id: doc.id,
           ...doc.data(),
         }));
-        setNotes(docs);
-        setNotesLoading(false);
+        startTransition(() => {
+          setNotes(docs);
+          setNotesLoading(false);
+        });
       },
       (err) => {
         console.error("Erreur de lecture des notes:", err);
-        setNotesError("Erreur lors du chargement de vos notes.");
-        setNotesLoading(false);
+        startTransition(() => {
+          setNotesError("Erreur lors du chargement de vos notes.");
+          setNotesLoading(false);
+        });
       }
     );
 
@@ -233,6 +242,50 @@ function App() {
     }
   };
 
+
+  const handleGenerateSummary = async (note) => {
+    setNotesError("");
+    if (!user) {
+      setNotesError("Vous devez être connecté pour générer un résumé.");
+      return;
+    }
+
+    setGeneratingSummary(true);
+    setSummaryNoteId(note.id);
+
+    try {
+      const response = await fetch(
+        "https://generatenotesummary-wzwbkts4ka-uc.a.run.app",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            noteId: note.id,
+            title: note.title || "",
+            content: note.content || "",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erreur lors de la génération du résumé.");
+      }
+
+      const data = await response.json();
+      console.log("Résumé AI généré:", data.summary);
+      // Le onSnapshot mettra à jour automatiquement la note avec aiSummary
+    } catch (err) {
+      console.error("Erreur lors de la génération du résumé AI:", err);
+      setNotesError("Erreur lors de la génération du résumé AI.");
+    } finally {
+      setGeneratingSummary(false);
+      setSummaryNoteId(null);
+    }
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -361,6 +414,12 @@ function App() {
                           className="note-image"
                         />
                       )}
+                      {note.aiSummary && (
+                        <div className="note-ai-summary">
+                          <strong>Résumé AI :</strong>
+                          <p>{note.aiSummary}</p>
+                        </div>
+                      )}
                       <p className="note-meta">
                         Créée le{" "}
                         {note.createdAt && note.createdAt.toDate
@@ -381,6 +440,16 @@ function App() {
                           onClick={() => handleDeleteNote(note.id)}
                         >
                           Supprimer
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-note-ai"
+                          onClick={() => handleGenerateSummary(note)}
+                          disabled={generatingSummary && summaryNoteId === note.id}
+                        >
+                          {generatingSummary && summaryNoteId === note.id
+                            ? "Génération en cours..."
+                            : "Générer un résumé AI"}
                         </button>
                       </div>
                     </li>

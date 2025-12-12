@@ -16,14 +16,15 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-if (import.meta.env.VITE_APPCHECK_RECAPTCHA_KEY) {
-  initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(
-      import.meta.env.VITE_APPCHECK_RECAPTCHA_KEY
-    ),
-    isTokenAutoRefreshEnabled: true, 
-  });
-}
+// Deshabilitar App Check temporalmente para desarrollo local
+// if (import.meta.env.VITE_APPCHECK_RECAPTCHA_KEY) {
+//   initializeAppCheck(app, {
+//     provider: new ReCaptchaV3Provider(
+//       import.meta.env.VITE_APPCHECK_RECAPTCHA_KEY
+//     ),
+//     isTokenAutoRefreshEnabled: true, 
+//   });
+// }
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();

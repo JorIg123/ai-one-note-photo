@@ -292,6 +292,44 @@
   background: #dc2626;
 }
 
+.btn-note-ai {
+  background: #10b981;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  flex: 1;
+}
+
+.btn-note-ai:hover {
+  background: #059669;
+}
+
+.btn-note-ai:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.note-ai-summary {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #1e293b;
+  border-left: 4px solid #10b981;
+  border-radius: 0.5rem;
+  text-align: left;
+}
+
+.note-ai-summary strong {
+  color: #10b981;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.note-ai-summary p {
+  margin: 0;
+  color: #e5e7eb;
+  line-height: 1.6;
+}
+
 .error-notes {
   margin-top: 0.5rem;
 }
